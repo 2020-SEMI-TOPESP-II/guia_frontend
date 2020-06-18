@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Frontend</title>
+</head>
+
+<body>
+    <h1 style="color:red;">Guia de frontend</h1>
+    <form id="formulario-estudiantes">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" type="text">
+        <label for="edad">Edad</label>
+        <input id="edad" name="edad" type="text">
+        <button type="submit">Enviar</button>
+    </form>
+    <h3>Cantidad de estudiantes:</h3>
+    <p id="cantidad-estudiantes"></p>
+    <table id="tabla-estudiantes"></table>
+    <script>
+        (() => {
+            const asociarEventoFormulario = () => {
+                // Enviar formulario de estudiante al server
+                const formulario = document.querySelector('#formulario-estudiantes');
+                formulario.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const nombre = document.querySelector('#nombre').value;
+                    const edad = document.querySelector('#edad').value;
+                    const headers = new Headers();
+                    headers.append("Content-Type", "application/json");
+                    const requestOptions = {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ nombre, edad }),
+                        redirect: 'follow'
+                    };
+                    fetch("http://localhost:3000/api/estudiantes/", requestOptions)
+                        .then(response => response.text())
+                        .then(result => leerEstudiantes())
+                        .catch(error => alert('error', error));
+                });
+            };
+            const leerEstudiantes = () => {
+                var requestOptions = {
+                    method: 'GET',
+                    redirect: 'follow'
+                };
+                fetch("http://localhost:3000/api/estudiantes/", requestOptions)
+                    .then(response => response.json())
+                    .then(result => {
+                        const tablaEstudiantes = document.querySelector('#tabla-estudiantes');
+                        const cantidadEstudiantes = document.querySelector('#cantidad-estudiantes');
+                        let tablaEstudiantesStr = '';
+                        result.estudiantes.forEach(v => {
+                            tablaEstudiantesStr += `<p>${v.nombre} tiene la edad ${v.edad}</p>`;
+                        });
+                        tablaEstudiantes.innerHTML = tablaEstudiantesStr;
+                        cantidadEstudiantes.innerHTML = result.cantidad;
+                    })
+                    .catch(error => console.log('error', error));
+            };
+
+            // Inicializador
+            asociarEventoFormulario();
+            leerEstudiantes();
+        })();
+    </script>
+</body>
+
+</html>
